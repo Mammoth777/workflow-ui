@@ -64,8 +64,6 @@ export default class NodeItem extends Item implements INodeItem {
         hoverClass: 'end-point-hover',
       }],
     }, common);
-
-    console.log(outPoint, inPoint, 'io point');
   }
 
   /**

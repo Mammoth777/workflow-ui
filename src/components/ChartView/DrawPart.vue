@@ -25,7 +25,7 @@
  * 3. 初始化连线
  */
 
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Inject } from 'vue-property-decorator';
 import { FunctionalComponentOptions } from 'vue';
 import { RecordPropsDefinition } from 'vue/types/options';
 import { jsPlumb, jsPlumbInstance } from 'jsplumb';
@@ -60,6 +60,8 @@ export default class DrawPart extends Vue implements IDrawPart {
   public nodes: INodeItem[] = [];
 
   public jsplumbInstance: jsPlumbInstance = jsPlumb.getInstance();
+
+  @Inject('apiEmit') private apiEmit!: (evtName: string, payload?: any) => void;
 
   /**
    * 1. 初始化jsplumb

@@ -12,8 +12,7 @@ export default class EdgeItem extends Item implements IEdgeItem {
     Object.assign(this, cloneEdgeInfo);
     // jsplumb连接
     const connection = this.connect(this.sourceId, this.targetId);
-    console.log(connection);
-    console.log(this.getJsplumbInstance().getConnections());
+    // todo 对Connection的处理
   }
 
   private connect(sourceId: string, targetId: string) {

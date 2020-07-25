@@ -2,7 +2,7 @@
   <div id="app">
     <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/> -->
-    <ChartView ref="chart"></ChartView>
+    <ChartView ref="chart" @haha="testFn"></ChartView>
   </div>
 </template>
 
@@ -54,7 +54,8 @@ ChartView.registNodeTypeByRender("DemoNode", {
 })
 export default class App extends Vue {
   public mounted() {
-    (this.$refs.chart as ChartView).initData({
+    const chart = this.$refs.chart as ChartView;
+    chart.initData({
       nodes: [
         {
           id: '1',
@@ -138,6 +139,21 @@ export default class App extends Vue {
         // }
       ],
     });
+    setTimeout(() => {
+      chart.addNode({
+          id: '3',
+          x: 60,
+          y: 100,
+          nodeType: "DemoNode",
+          task: {
+            title: "xx管理",
+          },
+        })
+    }, 3000);
+  }
+
+  public testFn = () => {
+    console.log('test');
   }
 }
 </script>
