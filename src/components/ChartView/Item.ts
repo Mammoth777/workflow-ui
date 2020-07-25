@@ -1,6 +1,5 @@
 import { IItem, IDrawPart } from './index';
 import { jsPlumbUtil } from 'jsplumb';
-import DrawPart from './DrawPart.vue';
 export default class Item implements IItem {
   public id: string;
   // 所有业务数据

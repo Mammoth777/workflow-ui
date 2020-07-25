@@ -1,7 +1,7 @@
 import { jsPlumbInstance } from "jsplumb";
 
 export interface IItem {
-  id: string
+  id?: string
   task: object
   selected?: boolean
 }

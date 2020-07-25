@@ -7,70 +7,74 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import ChartView from './components/ChartView/ChartView.vue';
-import Demo from './components/PresetNodes/Demo.vue';
+import { Component, Vue } from "vue-property-decorator";
+import ChartView from "./components/ChartView/ChartView.vue";
+import Demo from "./components/PresetNodes/Demo.vue";
 // import HelloWorld from './components/HelloWorld.vue';
 
-ChartView.registNodeTypeByRender('DemoNode', {
-  name: 'DemoNode',
+ChartView.registNodeTypeByRender("DemoNode", {
+  name: "DemoNode",
   functional: true,
   props: {
-    title: String
+    title: String,
   },
-  render (h, ctx) {
-    const { title } = ctx.props
-    return h('div', {
-      style: {
-        width: '200px',
-        height: '80px',
-        border: '1px solid #000',
-        background: '#fff'
-      }
-    }, [
-      h('div', '组件类型: DemoNode'),
-      h('div', '[prop]title: ' + title),
-      h('div', [
-        h('span', '外部组件引用: '),
-        h(Demo, {
-          props: {
-            compTitle: title
-          }
-        })
-      ])
-    ])
-  }
-})
+  render(h, ctx) {
+    const { title } = ctx.props;
+    return h(
+      "div",
+      {
+        style: {
+          width: "200px",
+          height: "80px",
+          border: "1px solid #000",
+          background: "#fff",
+        },
+      },
+      [
+        h("div", "组件类型: DemoNode"),
+        h("div", "[prop]title: " + title),
+        h("div", [
+          h("span", "外部组件引用: "),
+          h(Demo, {
+            props: {
+              compTitle: title,
+            },
+          }),
+        ]),
+      ]
+    );
+  },
+});
 
 @Component({
   components: {
     // HelloWorld,
     ChartView,
-  }
+  },
 })
 export default class App extends Vue {
-  mounted () {
+  public mounted() {
     (this.$refs.chart as ChartView).initData({
       nodes: [
         {
           id: '1',
           x: 10,
           y: 50,
+          nodeType: "DemoNode",
+          task: {
+            title: "代码管理",
+          },
+        },
+        {
+          id: '2',
+          x: 300,
+          y: 52,
           nodeType: 'DemoNode',
           task: {
-            title: '代码管理'
+            title: '构建任务',
+            status: '执行中'
           }
         },
-        // {
-        //   id: '2',
-        //   x: 300,
-        //   y: 52,
-        //   nodeType: 'SimpleFlowNode',
-        //   task: {
-        //     title: '构建任务',
-        //     status: '执行中'
-        //   }
-        // },
         // {
         //   id: '3',
         //   x: 598,
@@ -100,14 +104,12 @@ export default class App extends Vue {
         // }
       ],
       edges: [
+        {
+          sourceId: '1',
+          targetId: '2',
+          task: {}
+        },
         // {
-        //   id: '_jsplumb_c_1593419365488',
-        //   sourceId: '1',
-        //   targetId: '2',
-        //   task: {}
-        // },
-        // {
-        //   id: '_jsplumb_c_1593419365498',
         //   sourceId: '2',
         //   targetId: '3',
         //   task: {
@@ -134,8 +136,8 @@ export default class App extends Vue {
         //   targetId: '4',
         //   task: {}
         // }
-      ]
-    })
+      ],
+    });
   }
 }
 </script>

@@ -9,11 +9,11 @@ export default {
   name: 'Demo',
   props: ['compTitle'],
   methods: {
-    log () {
-      console.log('当前组件标题: ' + this.compTitle)
-    }
-  }
-}
+    log() {
+      console.log('当前组件标题: ' + this.compTitle);
+    },
+  },
+};
 </script>
 
 <style scoped lang="less">

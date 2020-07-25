@@ -25,24 +25,24 @@ export default {
     status: {
       type: String,
       default: '未开始',
-      validator (val) {
-        const flag = ['未开始', '执行中', '执行成功', '执行失败'].includes(val)
-        return flag
-      }
-    }
+      validator(val) {
+        const flag = ['未开始', '执行中', '执行成功', '执行失败'].includes(val);
+        return flag;
+      },
+    },
   },
   computed: {
-    mainColor () {
+    mainColor() {
       const map = {
         未开始: '#4c4c4b',
         执行中: '#11b4eb',
         执行成功: '#08c692',
-        执行失败: '#fe0001'
-      }
-      return map[this.status]
-    }
-  }
-}
+        执行失败: '#fe0001',
+      };
+      return map[this.status];
+    },
+  },
+};
 </script>
 
 <style lang="less">

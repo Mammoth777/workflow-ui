@@ -30,10 +30,11 @@ export default class NodeItem extends Item implements INodeItem {
     // 设置默认连线样式及overlays
     const common = {
       allowLoopback: false, // 不可回环
-    }
+    };
     const chart = this.getJsplumbInstance();
+    // todo 这里可以从外部传入设置
     // **添加起始点**
-    chart.addEndpoint(this.id, {
+    const outPoint = chart.addEndpoint(this.id, {
       uuid: 'out-' + this.id,
       isSource: true,
       // @ts-ignore 有!
@@ -48,7 +49,7 @@ export default class NodeItem extends Item implements INodeItem {
       }]
     }, common);
     // **添加结束点**
-    chart.addEndpoint(this.id, {
+    const inPoint = chart.addEndpoint(this.id, {
       uuid: 'in-' + this.id,
       isTarget: true,
       // @ts-ignore 有!
@@ -63,6 +64,8 @@ export default class NodeItem extends Item implements INodeItem {
         hoverClass: 'end-point-hover',
       }],
     }, common);
+
+    console.log(outPoint, inPoint, 'io point');
   }
 
   /**
