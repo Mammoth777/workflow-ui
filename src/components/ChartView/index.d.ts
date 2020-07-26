@@ -4,6 +4,7 @@ export interface IItem {
   id?: string
   task: object
   selected?: boolean
+  updateTask: (task: object) => void
 }
 
 export interface INodeItem extends IItem {
@@ -17,7 +18,9 @@ export interface IEdgeItem extends IItem {
   targetId: string
 }
 
-export interface IDrawPart extends Vue {
+
+interface IDrawPart {
   nodes: INodeItem[]
   jsplumbInstance: jsPlumbInstance
 }
+type IDrawPartVm = IDrawPart & Vue

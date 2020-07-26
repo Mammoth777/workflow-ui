@@ -9,6 +9,8 @@
 ## 事件系统
 > emmm, 就用最简单的provide吧, 在顶层Vue示例做个触发器, 注入到每个子组件里, 挺好, 嗯, 是的
 
+- [x] node-created
+
 ## Project setup
 ```
 npm install

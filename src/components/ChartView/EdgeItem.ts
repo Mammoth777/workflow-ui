@@ -1,10 +1,10 @@
 import Item from './Item';
-import { IEdgeItem } from '.';
+import { IEdgeItem, IDrawPartVm } from '.';
 import _ from 'lodash';
 export default class EdgeItem extends Item implements IEdgeItem {
   public sourceId: string;
   public targetId: string;
-  constructor(vm: Vue, edgeInfo: IEdgeItem) {
+  constructor(vm: IDrawPartVm, edgeInfo: IEdgeItem) {
     super(vm, edgeInfo);
     this.sourceId = edgeInfo.sourceId;
     this.targetId = edgeInfo.targetId;
@@ -25,7 +25,7 @@ export default class EdgeItem extends Item implements IEdgeItem {
   }
 }
 
-export function createEdge(vm: Vue, edgeInfo: IEdgeItem) {
+export function createEdge(vm: IDrawPartVm, edgeInfo: IEdgeItem) {
   return new EdgeItem(vm, edgeInfo);
 }
 

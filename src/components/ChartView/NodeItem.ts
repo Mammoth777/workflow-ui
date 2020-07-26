@@ -1,12 +1,12 @@
 import Item from './Item';
-import { INodeItem } from '.';
-import _ from 'lodash';
+import { INodeItem, IDrawPartVm } from '.';
+import cloneDeep from 'lodash/cloneDeep';
 export default class NodeItem extends Item implements INodeItem {
   public x: number;
   public y: number;
   public nodeType: string;
 
-  constructor(vm: Vue, nodeInfo: INodeItem) {
+  constructor(vm: IDrawPartVm, nodeInfo: INodeItem) {
     super(vm, nodeInfo);
     // 1. 节点基本参数
     this.x = nodeInfo.x;
@@ -21,6 +21,14 @@ export default class NodeItem extends Item implements INodeItem {
     }, 0);
     const cloneNodeInfo = _.cloneDeep(nodeInfo);
     Object.assign(this, cloneNodeInfo);
+  }
+
+  /**
+   * 更新业务数据
+   * @param task 任务
+   */
+  public updateTask(task: object) {
+    this.task = cloneDeep(task);
   }
 
   /**
@@ -86,6 +94,6 @@ export default class NodeItem extends Item implements INodeItem {
   }
 }
 
-export function createNode(vm: Vue, nodeInfo: INodeItem): NodeItem {
+export function createNode(vm: IDrawPartVm, nodeInfo: INodeItem): NodeItem {
   return new NodeItem(vm, nodeInfo);
 }

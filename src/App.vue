@@ -2,7 +2,7 @@
   <div id="app">
     <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/> -->
-    <ChartView ref="chart" @haha="testFn"></ChartView>
+    <ChartView ref="chart" @node-created="nodeCreated"></ChartView>
   </div>
 </template>
 
@@ -10,6 +10,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import ChartView from "./components/ChartView/ChartView.vue";
 import Demo from "./components/PresetNodes/Demo.vue";
+import { INodeItem } from './components/ChartView';
 // import HelloWorld from './components/HelloWorld.vue';
 
 ChartView.registNodeTypeByRender("DemoNode", {
@@ -148,12 +149,16 @@ export default class App extends Vue {
           task: {
             title: "xx管理",
           },
-        })
+        });
     }, 3000);
   }
 
   public testFn = () => {
     console.log('test');
+  }
+
+  public nodeCreated = (node: object) => {
+    console.log(node);
   }
 }
 </script>
