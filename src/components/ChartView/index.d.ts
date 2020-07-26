@@ -4,7 +4,7 @@ export interface IItem {
   id?: string
   task: object
   selected?: boolean
-  updateTask: (task: object) => void
+  // updateTask: (task: object) => void
 }
 
 export interface INodeItem extends IItem {

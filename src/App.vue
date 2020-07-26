@@ -11,6 +11,7 @@ import { Component, Vue } from "vue-property-decorator";
 import ChartView from "./components/ChartView/ChartView.vue";
 import Demo from "./components/PresetNodes/Demo.vue";
 import { INodeItem } from './components/ChartView';
+import FlowNode from './components/PresetNodes/DefaultFlowNode.vue';
 // import HelloWorld from './components/HelloWorld.vue';
 
 ChartView.registNodeTypeByRender("DemoNode", {
@@ -46,6 +47,8 @@ ChartView.registNodeTypeByRender("DemoNode", {
     );
   },
 });
+
+ChartView.registNodeType("FlowNode", FlowNode);
 
 @Component({
   components: {
@@ -145,7 +148,7 @@ export default class App extends Vue {
           id: '3',
           x: 60,
           y: 100,
-          nodeType: "DemoNode",
+          nodeType: "FlowNode",
           task: {
             title: "xx管理",
           },

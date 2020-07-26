@@ -1,10 +1,12 @@
 import Item from './Item';
 import { INodeItem, IDrawPartVm } from '.';
 import cloneDeep from 'lodash/cloneDeep';
+import { nextMacroTask } from './utils';
 export default class NodeItem extends Item implements INodeItem {
   public x: number;
   public y: number;
   public nodeType: string;
+  public dom?: HTMLElement; // 只要选择过此节点, 就会被记录, 在节点blur时, 可以只遍历这些被选择过的, 使其取消选择即可
 
   constructor(vm: IDrawPartVm, nodeInfo: INodeItem) {
     super(vm, nodeInfo);
@@ -19,7 +21,7 @@ export default class NodeItem extends Item implements INodeItem {
       // 2.2 设置节点可拖动
       this.setDraggable();
     }, 0);
-    const cloneNodeInfo = _.cloneDeep(nodeInfo);
+    const cloneNodeInfo = cloneDeep(nodeInfo);
     Object.assign(this, cloneNodeInfo);
   }
 
@@ -29,6 +31,16 @@ export default class NodeItem extends Item implements INodeItem {
    */
   public updateTask(task: object) {
     this.task = cloneDeep(task);
+  }
+
+  public setSelected(flag: boolean, dom: HTMLElement) {
+    this.dom = dom;
+    this.vm.$set(this, 'selected', flag);
+    if (flag) {
+      dom.classList.add('node-selected');
+    } else {
+      dom.classList.remove('node-selected');
+    }
   }
 
   /**
@@ -95,5 +107,7 @@ export default class NodeItem extends Item implements INodeItem {
 }
 
 export function createNode(vm: IDrawPartVm, nodeInfo: INodeItem): NodeItem {
-  return new NodeItem(vm, nodeInfo);
+  const node = new NodeItem(vm, nodeInfo);
+  vm.nodes.push(node);
+  return node;
 }

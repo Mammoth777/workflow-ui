@@ -45,7 +45,8 @@ export default {
 };
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
+
 .default-flow-node {
   width: 150px;
   height: 80px;
@@ -55,6 +56,9 @@ export default {
   border-radius: 8px;
   background-color: #fff;
   transition: all 0.3s ease-in;
+  &.node-selected {
+    box-shadow: 0px 0px 20px 0px #fff5d0;
+  }
   .status {
     padding: 5px;
     margin: 0 10px;
