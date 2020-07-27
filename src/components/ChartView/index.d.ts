@@ -36,7 +36,7 @@ interface IDrawPart {
 }
 type IDrawPartVm = IDrawPart & Vue
 
-type PLUGIN = (nodeListWrapperDom: HTMLElement,
+type PLUGIN = (workSpaceDom: HTMLElement,
   chartViewVueInstance: Vue,
   jsplumbInstance: jsPlumbInstance) => VNode | void
 

@@ -1,0 +1,32 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<!--
+2013-9-30: Created.
+-->
+<svg>
+<metadata>
+Created by iconfont
+</metadata>
+<defs>
+
+<font id="iconfont" horiz-adv-x="1024" >
+  <font-face
+    font-family="iconfont"
+    font-weight="500"
+    font-stretch="normal"
+    units-per-em="1024"
+    ascent="896"
+    descent="-128"
+  />
+    <missing-glyph />
+    
+    <glyph glyph-name="add" unicode="&#58894;" d="M512 768c211.2 0 384-172.8 384-384s-172.8-384-384-384-384 172.8-384 384 172.8 384 384 384m0 64C262.4 832 64 633.6 64 384s198.4-448 448-448 448 198.4 448 448-198.4 448-448 448zM320 384m-32 0a32 32 0 1 1 64 0 32 32 0 1 1-64 0ZM704 384m-32 0a32 32 0 1 1 64 0 32 32 0 1 1-64 0ZM512 576m-32 0a32 32 0 1 1 64 0 32 32 0 1 1-64 0ZM512 192m-32 0a32 32 0 1 1 64 0 32 32 0 1 1-64 0ZM320 416h384v-64H320zM480 576h64v-384h-64z"  horiz-adv-x="1024" />
+
+    
+    <glyph glyph-name="minus" unicode="&#58928;" d="M512-66a450 450 0 1 0 450 450 450 450 0 0 0-450-450z m0 825.00000029a375.00000029 375.00000029 0 1 1 375.00000029-375.00000029A375.00000029 375.00000029 0 0 1 512 759.00000029z m187.49999971-406.87500058H324.50000029a37.50000029 37.50000029 0 0 0 0 75.00000058h374.99999942a37.50000029 37.50000029 0 0 0 0-75.00000058z"  horiz-adv-x="1024" />
+
+    
+
+
+  </font>
+</defs></svg>

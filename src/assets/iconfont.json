@@ -1,0 +1,23 @@
+{
+  "id": "1945076",
+  "name": "workflow-ui",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon",
+  "description": "工作流UI库",
+  "glyphs": [
+    {
+      "icon_id": "1471835",
+      "name": "add",
+      "font_class": "add",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "7605133",
+      "name": "minus",
+      "font_class": "minus",
+      "unicode": "e630",
+      "unicode_decimal": 58928
+    }
+  ]
+}

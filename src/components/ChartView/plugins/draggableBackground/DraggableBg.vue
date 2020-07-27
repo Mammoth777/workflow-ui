@@ -14,7 +14,7 @@ export default class DraggableBg extends Vue {
   private chartViewVm!: Vue;
 
   @Prop()
-  private nodeListWrapper!: HTMLElement;
+  private workSpace!: HTMLElement;
 
   private dragView = {
     isDragging: false,
@@ -73,15 +73,15 @@ export default class DraggableBg extends Vue {
     const drawLayerDom = this.drawLayerDom = this.chartViewVm.$refs.drawLayer as HTMLElement;
     drawLayerDom.style.position = 'relative';
 
-    this.nodeListWrapper.addEventListener('mousedown', this.mousedownHandler);
-    this.nodeListWrapper.addEventListener('mousemove', this.mousemoveHandler);
+    this.workSpace.addEventListener('mousedown', this.mousedownHandler);
+    this.workSpace.addEventListener('mousemove', this.mousemoveHandler);
     document.body.addEventListener('mouseup', this.mouseupHandler);
   }
 
   private beforeDestory() {
     console.log('hook beforeDestory');
-    this.nodeListWrapper.removeEventListener('mousedown', this.mousedownHandler);
-    this.nodeListWrapper.removeEventListener('mousemove', this.mousemoveHandler);
+    this.workSpace.removeEventListener('mousedown', this.mousedownHandler);
+    this.workSpace.removeEventListener('mousemove', this.mousemoveHandler);
     document.body.removeEventListener('mouseup', this.mouseupHandler);
   }
 }

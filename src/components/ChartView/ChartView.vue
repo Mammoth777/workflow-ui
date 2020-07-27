@@ -1,9 +1,9 @@
 <template>
   <div class="chart-view">
     <!-- 节点列表 -->
-    <div class="node-list-wrapper"
+    <div class="work-space"
       :style="workFlowStyle"
-      ref="nodeListWrapper"
+      ref="workSpace"
       @dragenter="preventHandler"
       @dragover="preventHandler"
       @drop="dropHandler"
@@ -91,7 +91,7 @@ function getSize(size: number | string): string {
 }
 
 const PLUGINS: Array<
-  ( nodeListWrapperDom: HTMLElement,
+  ( workSpaceDom: HTMLElement,
     chartViewVueInstance: Vue,
     jsplumbInstance: jsPlumbInstance) => VNode | void
   > = [];
@@ -399,7 +399,7 @@ export default class ChartView extends Vue implements IWorkflowUI {
 
   private mounted() {
     const vm = this;
-    const dom = this.$refs.nodeListWrapper as HTMLElement;
+    const dom = this.$refs.workSpace as HTMLElement;
     const jsplumbInstance = this.drawPart.jsplumbInstance;
     const pluginsVNodes = PLUGINS
       .map((plugin) => plugin.call(this, dom, vm, jsplumbInstance))
@@ -414,7 +414,7 @@ export default class ChartView extends Vue implements IWorkflowUI {
 
 <style lang="less" scoped>
 @import url('./style/chartStyle.less');
-.node-list-wrapper {
+.work-space {
     overflow: hidden;
     position: relative;
     .node-list-container {

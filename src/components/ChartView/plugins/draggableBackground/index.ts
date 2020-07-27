@@ -3,7 +3,7 @@ import { VNode } from 'vue/types/umd';
 import DraggableBg from './DraggableBg.vue';
 
 export default function(
-  nodeListWrapper: HTMLElement,
+  workSpace: HTMLElement,
   chartViewVm: Vue,
   jsplumbInstance: jsPlumbInstance
 ): VNode | void {
@@ -13,7 +13,7 @@ export default function(
   const bgComp = h(DraggableBg, {
     props: {
       chartViewVm,
-      nodeListWrapper
+      workSpace
     }
   });
   return bgComp;
@@ -27,20 +27,20 @@ export default function(
   //   background-image: linear-gradient(#eee 1px, transparent 0), linear-gradient(90deg, #eee 1px, transparent 0);
   //   background-size: 30px 30px;
   // `);
-  // nodeListWrapper.insertBefore(bgDom, nodeListWrapper.firstElementChild);
+  // workSpace.insertBefore(bgDom, workSpace.firstElementChild);
 
   // 2. 视图拖动绑定
   // const drawLayerDom = chartViewVm.$refs.drawLayer as HTMLElement;
   // drawLayerDom.style.position = 'relative';
   // const mousemove = mousemoveHandler.bind(null, bgDom, drawLayerDom);
-  // nodeListWrapper.addEventListener('mousedown', mousedownHandler);
-  // nodeListWrapper.addEventListener('mousemove', mousemove);
+  // workSpace.addEventListener('mousedown', mousedownHandler);
+  // workSpace.addEventListener('mousemove', mousemove);
   // document.body.addEventListener('mouseup', mouseupHandler);
   // // 3. 视图拖动解绑
   // chartViewVm.$on('hook:beforeDestory', () => {
   //   console.log('hook beforeDestory');
-  //   nodeListWrapper.removeEventListener('mousedown', mousedownHandler);
-  //   nodeListWrapper.removeEventListener('mousemove', mousemove);
+  //   workSpace.removeEventListener('mousedown', mousedownHandler);
+  //   workSpace.removeEventListener('mousemove', mousemove);
   //   document.body.removeEventListener('mouseup', mouseupHandler);
   // });
 }
