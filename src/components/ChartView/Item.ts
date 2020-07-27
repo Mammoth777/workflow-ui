@@ -3,7 +3,9 @@ import { jsPlumbUtil } from 'jsplumb';
 export default abstract class Item implements IItem {
   public id: string;
   // 所有业务数据
-  public task: object;
+  public task: {
+    [key: string]: any
+  };
   // 当前连线/节点是否被选择
   public selected?: boolean = false;
   public vm: IDrawPartVm;

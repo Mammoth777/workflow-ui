@@ -1,10 +1,24 @@
 <template>
   <div class="chart-view">
-    ChartView
-    <div class="draw-layer">
-      <DrawPart ref="chart"></DrawPart>
+    <!-- 节点列表 -->
+    <div class="node-list-wrapper"
+      :style="workFlowStyle"
+      ref="nodeListWrapper"
+      @dragenter="preventHandler"
+      @dragover="preventHandler"
+      @drop="dropHandler"
+    >
+      <!-- 怎么设计一个vue组件的插件?? -->
+      <div class="plugins-layer">
+        <plugin-layer :plugins="plugins"></plugin-layer>
+      </div>
+      <div class="draw-layer" ref="drawLayer">
+        <DrawPart
+          class="node-list-container"
+          ref="chart"
+        ></DrawPart>
+      </div>
     </div>
-    <div class="plugins-layer">plugins layer</div>
   </div>
 </template>
 
@@ -14,24 +28,21 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Provide } from "vue-property-decorator";
-import { FunctionalComponentOptions, VueConstructor } from "vue";
+import { FunctionalComponentOptions, VueConstructor, VNode } from "vue";
 import { RecordPropsDefinition } from "vue/types/options";
-import DrawPart from "./DrawPart.vue";
+import DrawPart, { NODE_TYPES } from "./DrawPart.vue";
 import NodeItem, { createNode } from "./NodeItem";
 import EdgeItem from "./EdgeItem";
 import cloneDeep from "lodash/cloneDeep";
-import { INodeItem, IEdgeItem, IItem } from ".";
-import { Connection } from "jsplumb";
+import isString from "lodash/isString";
+import { INodeItem, IEdgeItem, IItem, ItemType, IWorkflowUI } from ".";
+import { Connection, jsPlumbInstance } from "jsplumb";
 import { nextMacroTask } from "./utils";
+import PluginLayer from "./PluginLayer.vue";
 
 interface IChartData {
   nodes: INodeItem[];
   edges: IEdgeItem[];
-}
-
-enum ItemType {
-  node = 'node',
-  edge = 'edge'
 }
 
 /**
@@ -56,20 +67,42 @@ function getPreviousNodeIds(nodeId: string, edges: IEdgeItem[]) {
   return result;
 }
 
+/**
+ * 删除掉vm成员属性,
+ * cloneDeep task
+ */
+function payloadInterception(payload: object) {
+  return Object.entries(payload).reduce((newPayload: {[key: string]: any}, [key, value]) => {
+    if (key !== 'vm') {
+      newPayload[key] = value;
+    }
+    if (key === 'task') {
+      newPayload[key] = cloneDeep(value);
+    }
+    return newPayload;
+  }, {});
+}
+
+/**
+ * 计算宽高位置
+ */
+function getSize(size: number | string): string {
+  return typeof size === 'string' ? size : size + 'px';
+}
+
+const PLUGINS: Array<
+  ( nodeListWrapperDom: HTMLElement,
+    chartViewVueInstance: Vue,
+    jsplumbInstance: jsPlumbInstance) => VNode | void
+  > = [];
+
 @Component({
   components: {
     DrawPart,
+    PluginLayer
   },
 })
-export default class ChartView extends Vue {
-
-  /**
-   * 获取绘图板组件对象实例
-   */
-  get drawPart(): Vue & DrawPart {
-    return this.$refs.chart as Vue & DrawPart;
-  }
-
+export default class ChartView extends Vue implements IWorkflowUI {
   /**
    * 注册节点类型
    */
@@ -85,7 +118,7 @@ export default class ChartView extends Vue {
    */
   public static registNodeType(componentName: string, SFC: VueConstructor, width?: number, height?: number) {
     if (!width || !height) {
-      console.warn('width或height未传入, 请确保已经在组件内部固定了节点宽高')
+      console.warn('width或height未传入, 请确保已经在组件内部固定了节点宽高');
     }
     const regist = DrawPart.registNodeType.bind(DrawPart);
     regist(componentName, {
@@ -106,35 +139,68 @@ export default class ChartView extends Vue {
   }
 
   /**
+   * 注册插件
+   */
+  public static registPlugins(
+    plugins: typeof PLUGINS
+  ): void {
+    PLUGINS.push(...plugins);
+  }
+
+  /**
+   * 获取绘图板组件对象实例
+   */
+  get drawPart(): Vue & DrawPart {
+    return this.$refs.chart as Vue & DrawPart;
+  }
+
+  // 工作流dom样式
+  get workFlowStyle() {
+    return {
+      width: getSize(this.width!),
+      height: getSize(this.height!)
+    };
+  }
+
+  // 工作流组件宽度
+  @Prop({
+    default: 800
+  })
+  public width!: string | number;
+  // 工作流组件高度
+  @Prop({
+    default: 600
+  })
+  public height!: string | number;
+
+  public plugins: VNode[] = [];
+  /**
    * 初始化数据
    */
-  public async initData(data: IChartData): Promise<void> {
+  public async initChart(data: IChartData): Promise<void> {
+    const drawPart = this.drawPart;
+    drawPart.jsplumbInstance.reset();
+    drawPart.nodes = [];
     const nodes = cloneDeep(data.nodes);
     const edges = cloneDeep(data.edges);
     // 必须先初始化节点, 否则连线无效
-    await this.drawPart.initNodes(nodes);
-    await this.drawPart.initEdges(edges);
-    this.drawPart.initJsplumbEvents();
+    await drawPart.initNodes(nodes);
+    await drawPart.initEdges(edges);
+    drawPart.initJsplumbEvents();
     return Promise.resolve();
   }
 
-  public async setData(chartData: IChartData) {
-    const { nodes, edges } = chartData;
-    return await this.initData({nodes, edges});
+  public setData(chartData: IChartData) {
+    return this.initChart(chartData);
   }
 
   /**
    * 创建节点
    */
-  public async addNode(nodeInfo: INodeItem) {
+  public async createNode(nodeInfo: INodeItem) {
     const node = await createNode(this.drawPart, cloneDeep(nodeInfo));
     await nextMacroTask(); // spec 注意, 这里是不得已而为之, 否则会连线失败, 猜测是endpoint渲染顺序问题
-    this.apiEmit("node-created", {
-      id: node.id,
-      nodeType: node.nodeType,
-      selected: node.selected,
-      task: node.task,
-    });
+    this.apiEmit("node-created", node);
   }
 
   /**
@@ -166,8 +232,8 @@ export default class ChartView extends Vue {
     const nodes = this.getNodes();
     const edges = this.getEdges();
     return {
-      nodes: cloneDeep(nodes),
-      edges: cloneDeep(edges)
+      nodes: nodes.map(payloadInterception),
+      edges: edges.map(payloadInterception)
     };
   }
 
@@ -189,7 +255,7 @@ export default class ChartView extends Vue {
     if (!currNode) {
       throw new Error(`当前节点(id:${nodeId})不存在`);
     }
-    const prevNodeIds = getPreviousNodeIds(nodeId, edges);
+    const prevNodeIds = getPreviousNodeIds(nodeId, edges as IEdgeItem[]);
     return prevNodeIds.map(this.getNodeById);
   }
 
@@ -253,11 +319,11 @@ export default class ChartView extends Vue {
   private async updateEdge(id: string, task: object) {
     // @ts-ignore
     const allConnections: Connection[] = this.drawPart.jsplumbInstance.getConnections();
-    // @ts-ignore
-    const currConn = allConnections.filter((edge) => edge.getId() === id)[0];
-    if (currConn) {
+    const currEdge = allConnections
       // @ts-ignore
-      const currEdge: EdgeItem = currConn.getData();
+      .map((connection) => connection.getData())
+      .filter((edge) => edge.id === id)[0];
+    if (currEdge) {
       currEdge.updateTask(task);
     } else {
       console.error('此id没有对应的edge');
@@ -290,16 +356,69 @@ export default class ChartView extends Vue {
   // return
   // }
 
+      // 节点drop事件处理
+  private dropHandler(e: DragEvent) {
+    e.preventDefault();
+    //  1. 节点视图处理
+    const nodeType = e.dataTransfer!.getData('nodeType');
+    if (!isString(nodeType)) {
+      throw new TypeError('获取节点类型失败');
+    }
+    // fix: 拖动画布后, 拖入节点不显示问题(e.toElement改变导致获取数据错误)
+    const boundRect = this.drawPart.$el.getBoundingClientRect();
+    const x = e.clientX - boundRect.x - 20;
+    const y = e.clientY - boundRect.y - 20;
+    const CURR_TYPES = Object.keys(NODE_TYPES);
+    if (!CURR_TYPES.includes(nodeType)) {
+      throw new Error(`${nodeType}节点类型未注册;\n\n当前已注册节点类型: [${CURR_TYPES.join(',')}]`);
+    }
+    // 2. 节点任务处理
+    const task = e.dataTransfer!.getData('task');
+    this.createNode({
+      x,
+      y,
+      nodeType,
+      task: JSON.parse(task)
+    });
+  }
+
+  private preventHandler(e: Event) {
+    // 注意: 此处阻止了以后, drop才会触发
+    e.preventDefault();
+  }
+
   /**
    * 触发事件, 用于给外部暴露的api事件, 所以我的方法名取的很好😁
    */
   @Provide()
   private apiEmit(eventName: string, payload?: any, originEvent?: Event): void {
     // todo 这里originEvent先留着, 也许用得上
-    this.$emit(eventName, payload);
+    // 参数拦截
+    this.$emit(eventName, payloadInterception(payload));
+  }
+
+  private mounted() {
+    const vm = this;
+    const dom = this.$refs.nodeListWrapper as HTMLElement;
+    const jsplumbInstance = this.drawPart.jsplumbInstance;
+    const pluginsVNodes = PLUGINS
+      .map((plugin) => plugin.call(this, dom, vm, jsplumbInstance))
+      .filter((vnode) => vnode);
+    this.plugins.push(...pluginsVNodes as VNode[]);
+  }
+  private beforeDestroy() {
+    this.$emit('hook:beforeDestory');
   }
 }
 </script>
 
 <style lang="less" scoped>
+@import url('./style/chartStyle.less');
+.node-list-wrapper {
+    overflow: hidden;
+    position: relative;
+    .node-list-container {
+      position: relative;
+    }
+  }
 </style>

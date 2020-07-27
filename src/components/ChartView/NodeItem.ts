@@ -1,7 +1,6 @@
 import Item from './Item';
-import { INodeItem, IDrawPartVm } from '.';
 import cloneDeep from 'lodash/cloneDeep';
-import { nextMacroTask } from './utils';
+import { INodeItem, IDrawPartVm } from '.';
 export default class NodeItem extends Item implements INodeItem {
   public x: number;
   public y: number;

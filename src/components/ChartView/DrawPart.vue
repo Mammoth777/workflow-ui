@@ -56,7 +56,7 @@ function findNodeElement(element: HTMLElement): HTMLElement | void {
   }
 }
 
-const NODE_TYPES: { [name: string]: FunctionalComponentOptions } = {};
+export const NODE_TYPES: { [name: string]: FunctionalComponentOptions } = {};
 
 @Component({})
 export default class DrawPart extends Vue implements IDrawPart {
@@ -82,7 +82,7 @@ export default class DrawPart extends Vue implements IDrawPart {
 
   public jsplumbInstance: jsPlumbInstance = jsPlumb.getInstance();
 
-  @Inject('apiEmit') private apiEmit!: (evtName: string, payload?: any) => void;
+  @Inject('apiEmit') public apiEmit!: (evtName: string, payload?: any) => void;
 
   /**
    * 1. 初始化jsplumb
@@ -99,7 +99,7 @@ export default class DrawPart extends Vue implements IDrawPart {
   /**
    * 2. 初始化节点
    */
-  public async initNodes(nodes: INodeItem[]): Promise<void> {
+  public initNodes(nodes: INodeItem[]): Promise<void> {
     return new Promise((resolve) => {
       this.jsplumbInstance.ready(async () => {
         nodes.map((info) => createNode(this, info));
@@ -112,10 +112,11 @@ export default class DrawPart extends Vue implements IDrawPart {
   /**
    * 3. 初始化连线
    */
-  public async initEdges(edges: IEdgeItem[]): Promise<void> {
+  public initEdges(edges: IEdgeItem[]): Promise<void> {
     return new Promise((resolve) => {
       this.jsplumbInstance.ready(() => {
         edges.forEach((edge) => createEdge(this, edge));
+        resolve();
       });
     });
   }
@@ -128,36 +129,37 @@ export default class DrawPart extends Vue implements IDrawPart {
     const vm = this;
     // 避免两个节点中重复拉线 😄拖动生成连线callback
     chart.bind('beforeDrop', (params) => {
+      // @ts-ignore
+      const { dropEndpoint, connection } = params;
+      if (!dropEndpoint) {
+        throw Error('drop在作为Target的节点上了吗? check it');
+      }
+      // 已存在相同连线
+      const connExist = dropEndpoint.connections.some((conn: IEdgeItem) =>
+        (conn.targetId === connection.targetId && conn.sourceId === connection.sourceId)
+      );
+      if (connExist) {
+        return false;
+      } else {
+      // 3.2 给每个新连线生成默认值
+        createEdge(vm, {...connection, task: {}});
+        // console.log(connection, connection.getData(), 'before drop')
+        return true;
+      }
+    });
+    // 连线事件处理
+    chart.bind('connection', (info, originalEvent) => {
+      console.log('connection event');
+      const edge = createEdge(vm, {
         // @ts-ignore
-        const { dropEndpoint, connection } = params;
-        if (!dropEndpoint) {
-          throw Error('drop在作为Target的节点上了吗? check it');
-        }
-        // 已存在相同连线
-        const connExist = dropEndpoint.connections.some((conn: IEdgeItem) =>
-          (conn.targetId === connection.targetId && conn.sourceId === connection.sourceId)
-        );
-        if (connExist) {
-          return false;
-        } else {
-        // 3.2 给每个新连线生成默认值
-          createEdge(vm, {...connection, task: {}});
-          // console.log(connection, connection.getData(), 'before drop')
-          return true;
-        }
+        id: info.connection.getId(),
+        task: {},
+        sourceId: info.sourceId,
+        targetId: info.targetId,
+        connection: info.connection
       });
-      // 连线事件处理
-    chart.bind('connection', async (info, originalEvent) => {
-        console.log('connection event');
-        await nextMacroTask();
-        vm.apiEmit('edge-connected', {
-          // @ts-ignore
-          id: info.connection.getId(),
-          task: {},
-          sourceId: info.sourceId,
-          targetId: info.targetId
-        });
-      });
+      vm.apiEmit('edge-connected', edge);
+    });
   }
 
   // 全局失焦处理
@@ -195,7 +197,6 @@ export default class DrawPart extends Vue implements IDrawPart {
 .draw-part {
   width: 800px;
   height: 600px;
-  background-color: #ccc;
   position: relative;
   .node-item {
     position: absolute;

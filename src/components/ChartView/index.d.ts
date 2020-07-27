@@ -1,8 +1,17 @@
-import { jsPlumbInstance } from "jsplumb";
+import { jsPlumbInstance, Connection } from "jsplumb";
+import { VNode } from "vue/types/umd";
+
+export enum ItemType {
+  node = 'node',
+  edge = 'edge'
+}
+
 
 export interface IItem {
   id?: string
-  task: object
+  task: {
+    [key: string]: any
+  }
   selected?: boolean
   // updateTask: (task: object) => void
 }
@@ -16,11 +25,21 @@ export interface INodeItem extends IItem {
 export interface IEdgeItem extends IItem {
   sourceId: string
   targetId: string
+  connection?: Connection
 }
 
 
 interface IDrawPart {
   nodes: INodeItem[]
   jsplumbInstance: jsPlumbInstance
+  apiEmit: (evtName: string, payload?: any) => void
 }
 type IDrawPartVm = IDrawPart & Vue
+
+type PLUGIN = (nodeListWrapperDom: HTMLElement,
+  chartViewVueInstance: Vue,
+  jsplumbInstance: jsPlumbInstance) => VNode | void
+
+export interface IWorkflowUI {
+  deleteItem: (itemType: ItemType, id: string) => void;
+}
