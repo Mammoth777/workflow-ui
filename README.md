@@ -1,9 +1,13 @@
 # workflow-ui
 
+> 晚点写文档..
+
 ## todo
 
+- [ ] 注册插件的函数参数要再想想
 - [x] 双击节点, 在节点元素上增加 `node-selected` class
-- [ ] 插件系统, 暴露jsplumb对象, vue实例, 节点层dom, 插件层dom
+- [x] 插件系统, 暴露jsplumb对象, vue实例, 节点层dom, 插件层dom
+- [ ] 单个节点对应一组endpoints
 
 ## 事件系统
 > emmm, 就用最简单的provide吧, 在顶层Vue示例做个触发器, 注入到每个子组件里, 挺好, 嗯, 是的

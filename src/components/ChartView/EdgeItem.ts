@@ -14,7 +14,6 @@ export default class EdgeItem extends Item implements IEdgeItem {
     // Object.assign(this, cloneEdgeInfo);
     // jsplumb连接
     const connection = edgeInfo.connection || this.connect(this.sourceId, this.targetId);
-    // todo 对Connection的处理
     // @ts-ignore 🌟 有这个方法!
     connection.setData(this); // connection.getData()  ->  Edge实例对象
     this.connection = connection; // edge.connection   -> Connection对象

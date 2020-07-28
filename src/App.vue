@@ -1,7 +1,8 @@
 <template>
   <div id="app">
     <div class="op-container">
-      <!-- <div class="type-list">
+      <div class="type-list">
+        拖动到绘图区👉
         <ul>
           <li
             v-for="(item, index) in ['DemoNode', 'FlowNode', 'Test'].map(v => ({nodeType: v, task: {taskType: 'Devops'}}))"
@@ -12,7 +13,7 @@
             {{item.nodeType}}
           </li>
         </ul>
-      </div>-->
+      </div>
       <ChartView
         width="800px"
         height="600px"
@@ -63,7 +64,7 @@
       <button @click="printPrevNodes(currentEditingItem.id)">打印前置节点</button>
     </div>
     <div style="display: flex;">
-      <button @click="$refs.chart.getData()">get data</button>
+      <button @click="logData">get data</button>
     </div>
   </div>
 </template>
@@ -71,7 +72,7 @@
 <script>
 // @ts-nocheck
 import { Component, Vue } from "vue-property-decorator";
-import ChartView from "./components/ChartView/main.ts";
+import ChartView, { draggableNodetype } from "./components/ChartView/main.ts";
 import Demo from "./components/PresetNodes/Demo.vue";
 import FlowNode from "./components/PresetNodes/DefaultFlowNode.vue";
 // import DragBG from './components/ChartView/plugins/draggableBackground';
@@ -121,6 +122,9 @@ export default {
   name: "App",
   components: {
     ChartView
+  },
+  directives: {
+    draggableNodetype
   },
   data() {
     return {
@@ -176,6 +180,10 @@ export default {
       // chart.updateItem('edge', id, { condition: 'yes' })
       // }, 0)
       // }
+    },
+    logData () {
+      const data = this.$refs.chart.getData();
+      console.log(data, 'data');
     }
   },
   async mounted() {
@@ -270,7 +278,7 @@ export default {
         console.log("chart init done");
         this.$refs.chart.createNode({
           nodeType: "FlowNode",
-          x: 300,
+          x: 10,
           y: 300,
           task: {}
         });
@@ -341,6 +349,10 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.type-list {
+  padding-right: 5px;
+  border-right: 1px dashed #4c4c4b;
 }
 .op-container {
   display: flex;
