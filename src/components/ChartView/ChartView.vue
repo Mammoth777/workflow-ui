@@ -18,6 +18,14 @@
           ref="chart"
         ></DrawPart>
       </div>
+      <!-- 右键菜单 -->
+      <vue-context ref="contextMenu" class="context-menu" v-if="contextMenuList.length">
+        <template v-slot="child">
+          <li class="context-item" v-for="menu in contextMenuList" :key="menu.label">
+            <a class="context-item-link" @click.prevent="contextMenuItemClick(menu, child.data)" v-text="menu.label"></a>
+          </li>
+        </template>
+      </vue-context>
     </div>
   </div>
 </template>
@@ -39,10 +47,18 @@ import { INodeItem, IEdgeItem, IItem, ItemType, IWorkflowUI } from ".";
 import { Connection, jsPlumbInstance } from "jsplumb";
 import { nextMacroTask } from "./utils";
 import PluginLayer from "./PluginLayer.vue";
+// @ts-ignore 没有声明文件
+import VueContext from "vue-context";
+import "vue-context/dist/css/vue-context.css";
 
 interface IChartData {
   nodes: INodeItem[];
   edges: IEdgeItem[];
+}
+
+interface IContextMenu {
+  label: string;
+  onClick: (nodeinfo: INodeItem) => void;
 }
 
 /**
@@ -99,7 +115,8 @@ const PLUGINS: Array<
 @Component({
   components: {
     DrawPart,
-    PluginLayer
+    PluginLayer,
+    VueContext
   },
 })
 export default class ChartView extends Vue implements IWorkflowUI {
@@ -161,6 +178,11 @@ export default class ChartView extends Vue implements IWorkflowUI {
       height: getSize(this.height!)
     };
   }
+
+  @Prop({
+    default: []
+  })
+  public contextMenuList!: IContextMenu[];
 
   // 工作流组件宽度
   @Prop({
@@ -257,6 +279,13 @@ export default class ChartView extends Vue implements IWorkflowUI {
     }
     const prevNodeIds = getPreviousNodeIds(nodeId, edges as IEdgeItem[]);
     return prevNodeIds.map(this.getNodeById);
+  }
+
+  /**
+   * 右键菜单点击事件处理
+   */
+  public contextMenuItemClick(menu: IContextMenu, data: INodeItem) {
+    menu.onClick(cloneDeep(data));
   }
 
   /**
@@ -392,9 +421,16 @@ export default class ChartView extends Vue implements IWorkflowUI {
    */
   @Provide()
   private apiEmit(eventName: string, payload?: any, originEvent?: Event): void {
-    // todo 这里originEvent先留着, 也许用得上
+    // done todo 这里originEvent先留着, 也许用得上, 果然用上了....
     // 参数拦截
-    this.$emit(eventName, payloadInterception(payload));
+    const params = payloadInterception(payload);
+    // 触发外部事件
+    this.$emit(eventName, params);
+    // spec 右键菜单特殊处理
+    if (eventName === 'node-contextmenu') {
+      // @ts-ignore 这个插件目前没写声明文件
+      this.$refs.contextMenu.open(originEvent, params);
+    }
   }
 
   private mounted() {
@@ -415,10 +451,21 @@ export default class ChartView extends Vue implements IWorkflowUI {
 <style lang="less" scoped>
 @import url('./style/chartStyle.less');
 .work-space {
-    overflow: hidden;
+  overflow: hidden;
+  position: relative;
+  .node-list-container {
     position: relative;
-    .node-list-container {
-      position: relative;
+  }
+  // 右键菜单
+  .context-menu {
+    min-width: 100px;
+    font-size: 14px;
+    .context-item {
+      .context-item-link {
+        padding: 4px 7px;
+        cursor: pointer;
+      }
     }
   }
+}
 </style>

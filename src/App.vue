@@ -181,7 +181,7 @@ export default {
       // }, 0)
       // }
     },
-    logData () {
+    logData() {
       const data = this.$refs.chart.getData();
       console.log(data, 'data');
     }

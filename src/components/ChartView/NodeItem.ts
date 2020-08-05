@@ -1,11 +1,13 @@
 import Item from './Item';
 import cloneDeep from 'lodash/cloneDeep';
 import { INodeItem, IDrawPartVm } from '.';
+import { Endpoint } from 'jsplumb';
 export default class NodeItem extends Item implements INodeItem {
   public x: number;
   public y: number;
   public nodeType: string;
   public dom?: HTMLElement; // 只要选择过此节点, 就会被记录, 在节点blur时, 可以只遍历这些被选择过的, 使其取消选择即可
+  public endPoints: Endpoint[] = []; // 每个节点的连接点
 
   constructor(vm: IDrawPartVm, nodeInfo: INodeItem) {
     super(vm, nodeInfo);

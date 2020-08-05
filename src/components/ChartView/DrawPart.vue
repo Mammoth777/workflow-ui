@@ -11,6 +11,7 @@
       :id="node.id"
       :data-nodetype="node.nodeType"
       @dblclick="nodeDblclickHandler($event, node)"
+      @contextmenu="nodeContextMenuHandler($event, node)"
     >
       <component
         v-bind:is="node.nodeType"
@@ -82,7 +83,7 @@ export default class DrawPart extends Vue implements IDrawPart {
 
   public jsplumbInstance: jsPlumbInstance = jsPlumb.getInstance();
 
-  @Inject('apiEmit') public apiEmit!: (evtName: string, payload?: any) => void;
+  @Inject('apiEmit') public apiEmit!: (evtName: string, payload?: any, event?: Event) => void;
 
   /**
    * 1. 初始化jsplumb
@@ -189,6 +190,16 @@ export default class DrawPart extends Vue implements IDrawPart {
       node.setSelected(true, nodeElement);
       this.apiEmit('node-dblclick', node);
     }
+  }
+
+  /**
+   * 节点右键点击, 显示右键菜单
+   */
+  private nodeContextMenuHandler(event: MouseEvent, node: NodeItem) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.itemBlurHandler();
+    this.apiEmit('node-contextmenu', node, event);
   }
 }
 </script>
