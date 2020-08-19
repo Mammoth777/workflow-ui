@@ -1,8 +1,8 @@
 <template>
   <div class="zoom-control">
-    <i class="iconfont iconminus" :class="['icon', { disabled: minusDisabled }]" @click="change(-defaultIncrement)"></i>
+    <i class="iconfont icon-jianshao" :class="['icon', { disabled: minusDisabled }]" @click="change(-defaultIncrement)"></i>
     <span class="zoom-rate">{{zoomRate}}%</span>
-    <i class="iconfont iconadd" :class="['icon', { disabled: addDisabled }]" @click="change(+defaultIncrement)"></i>
+    <i class="iconfont icon-zengjia-cuxiantiao" :class="['icon', { disabled: addDisabled }]" @click="change(+defaultIncrement)"></i>
   </div>
 </template>
 

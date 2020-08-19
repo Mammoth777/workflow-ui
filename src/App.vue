@@ -2,17 +2,14 @@
   <div id="app">
     <div class="op-container">
       <div class="type-list">
-        拖动到绘图区👉
-        <ul>
-          <li
-            v-for="(item, index) in ['DemoNode', 'FlowNode', 'Test'].map(v => ({nodeType: v, task: {taskType: 'Devops'}}))"
+          <div
+            class="con"
+            v-for="(item, index) in testNode"
             :key="index"
-            class="node-type-item"
-            v-draggable-nodetype="item"
-          >
-            {{item.nodeType}}
-          </li>
-        </ul>
+            v-draggable-nodetype="item">
+            <i class="iconfont" v-html="item.icon"></i>
+            <div class="name">{{item.name}}</div>
+          </div>
       </div>
       <ChartView
         width="800px"
@@ -20,7 +17,7 @@
         ref="chart"
         @node-created="nodeCreated"
         @node-dblclick="nodeSelected"
-        @node-deleted="nodeDeletedHandler"
+        @node-deleted="nodeDeleted"
         @edge-dblclick="edgeSelected"
         @edge-connected="edgeConnected"
         :contextMenuList="[
@@ -28,43 +25,30 @@
           { label: '编辑', onClick: node => contextMenuClick(node, '编辑') }
         ]"
       />
-    </div>
-    <div class="edit-item">
-      <h2>修改{{currentEditingItem.itemType}}</h2>
-      <div>
-        <div>id: {{currentEditingItem.id}}</div>
-        <div>node type: {{currentEditingItem.nodeType}}</div>
-        <div>
-          <hr />
-          <h3>task</h3>
-          <br />
-          <p>
-            title:
-            <input type="text" v-model="currentEditingItem.task.title" />
-          </p>
-          <p>
-            condition:
-            <input type="text" v-model="currentEditingItem.task.condition" />
-          </p>
-          <p>
-            status:
-            <select v-model="currentEditingItem.task.status">
-              <option value="未开始">未开始</option>
-              <option value="执行中">执行中</option>
-              <option value="执行失败">执行失败</option>
-              <option value="执行成功">执行成功</option>
-            </select>
-          </p>
-        </div>
+    <div class="edit-item" v-if="showEditBox">
+      <div class="con">类型：{{currentEditingItem.itemType}}</div>
+      <div class="con">id：{{currentEditingItem.id}}</div>
+      <div class="con">节点类型: {{currentEditingItem.nodeType}}</div>
+      <div class="con">标题:<input type="text" v-model="currentEditingItem.task.title"></div>
+      <div class="con">状态:
+        <select v-model="currentEditingItem.task.status">
+          <option value="未开始">未开始</option>
+          <option value="执行中">执行中</option>
+          <option value="执行失败">执行失败</option>
+          <option value="执行成功">执行成功</option>
+        </select>
       </div>
-      <button
-        @click="updateItem(currentEditingItem.itemType, currentEditingItem.id, currentEditingItem.task)"
-      >update item</button>
-      <button @click="deleteItem(currentEditingItem.itemType, currentEditingItem.id)">删除</button>
-      <button @click="printPrevNodes(currentEditingItem.id)">打印前置节点</button>
+      <button class="btn" @click="updateItem(currentEditingItem.itemType, currentEditingItem.id, currentEditingItem.task)">更新节点</button>
+      <button class="btn" @click="printPrevNodes(currentEditingItem.id)">获取前置节点</button>
+      <button class="btn" @click="getNodeById(currentEditingItem.id)">获取当前节点</button>
+      <button class="btn" @click="deleteItem('node', currentEditingItem.id)">删除节点</button>
+      <button class="btn" @click="showEditBox=!showEditBox">关闭弹窗</button>
     </div>
-    <div style="display: flex;">
-      <button @click="logData">get data</button>
+    </div>
+     <div class="btnBox">
+      <button class="btn" @click="getData">获取数据</button>
+      <button class="btn" @click="changeData">更改数据</button>
+      <button class="btn" @click="createNode">创建工具节点</button>
     </div>
   </div>
 </template>
@@ -77,41 +61,53 @@ import Demo from "./components/PresetNodes/Demo.vue";
 import FlowNode from "./components/PresetNodes/DefaultFlowNode.vue";
 // import DragBG from './components/ChartView/plugins/draggableBackground';
 // import HelloWorld from './components/HelloWorld.vue';
-
-ChartView.registNodeTypeByRender("DemoNode", {
-  name: "DemoNode",
+// 注册条件节点
+ChartView.registNodeTypeByRender('Condition', {
+  name: 'Condition',
   functional: true,
   props: {
     title: String
   },
-  render(h, ctx) {
-    const { title } = ctx.props;
-    return h(
-      "div",
-      {
+  render(h) {
+    return h('div', [
+      h('i', {
         style: {
-          width: "200px",
-          height: "80px",
-          border: "1px solid #000",
-          background: "#fff"
+          width: '32px',
+          height: '32px',
+          fontSize: '32px'
+        },
+        attrs: {
+          class: 'iconfont icon-tiaojian' // 如果是1那种写法,不能实时获取,获取的还是undefined
         }
-      },
-      [
-        h("div", "组件类型: DemoNode"),
-        h("div", "[prop]title: " + title),
-        h("div", [
-          h("span", "外部组件引用: "),
-          h(Demo, {
-            props: {
-              compTitle: title
-            }
-          })
-        ])
-      ]
-    );
+      }
+      )
+    ]);
   }
 });
-
+// 注册控制节点
+ChartView.registNodeTypeByRender('Control', {
+  name: 'Control',
+  functional: true,
+  props: {
+    title: String
+  },
+  render(h) {
+    return h('div', [
+      h('i', {
+        style: {
+          width: '32px',
+          height: '32px',
+          fontSize: '32px'
+        },
+        attrs: {
+          class: 'iconfont icon-changyongtubiao_Farmshezhi' // 如果是1那种写法,不能实时获取,获取的还是undefined
+        }
+      }
+      )
+    ]);
+  }
+});
+// 注册流程节点
 ChartView.registNodeType("FlowNode", FlowNode);
 
 // ChartView.registPlugins([
@@ -128,6 +124,12 @@ export default {
   },
   data() {
     return {
+      testNode: [
+        {nodeType: 'Control', name: '控制', icon: '&#xe602;'},
+        {nodeType: 'Condition', name: '条件', icon: '&#xe6d8;'},
+        {nodeType: 'FlowNode', name: '流程节点', icon: '&#xe627;'},
+      ],
+      showEditBox: false,
       currentEditingItem: {
         itemType: "", // node, edge
         task: {}
@@ -135,58 +137,94 @@ export default {
     };
   },
   methods: {
-    nodeDeletedHandler(node) {
-      console.log("节点被删除了", node);
+    // 删除
+    nodeDeleted(node) {
+      console.log('删除', node);
     },
+    // 创建
     nodeCreated(node) {
-      console.log(node, "created");
+      console.log('创建', node);
     },
+    // 双击节点
     nodeSelected(node) {
-      console.log(node, "node dblclicked");
-      this.currentEditingItem = Object.assign({ itemType: "node" }, node);
-      // more ...
+      console.log('双击节点', node);
+      this.showEditBox = true;
+      this.currentEditingItem = Object.assign({ itemType: 'node' }, node);
     },
+    // 双击边
     edgeSelected(edge) {
-      console.log(edge, "edge clicked");
-      this.currentEditingItem = Object.assign({ itemType: "edge" }, edge);
-      // more ...
+      console.log('双击边', edge);
+      // this.currentEditingItem = Object.assign({ itemType: 'edge' }, edge)
     },
+    // 边连线事件
+    edgeConnected(info) {
+      console.log('边连线', info);
+      const { id } = info;
+      this.$refs.chart.updateItem('edge', id, { condition: 'yes' });
+    },
+    // 实例下获取数据方法
+    getData() {
+      console.log('流程数据', this.$refs.chart.getData());
+    },
+    //  实例下更改数据方法
+    changeData() {
+      this.$refs.chart.setData({
+        nodes: [
+          {
+            id: '1',
+            x: 10,
+            y: 50,
+            nodeType: 'FlowNode',
+            task: {
+              title: '更改数据',
+              status: '执行成功'
+            }
+          }
+        ],
+        edges: []
+      });
+    },
+    // 实例下创建节点
+    createNode() {
+      this.$refs.chart.createNode({ nodeType: 'FlowNode', task: {
+        title: '新创建',
+        des: '新描述',
+        status: '执行失败'
+      } });
+
+    },
+    // 实例下更新节点方法
     updateItem(itemType, id, task) {
-      // currentEditingItem.id, currentEditingItem.task
       this.$refs.chart.updateItem(itemType, id, task);
+      this.showEditBox = false;
     },
+    // 实例下前置方法
+    printPrevNodes(currNodeId) {
+      console.log('前置节点', this.$refs.chart.getPreviousNodes(currNodeId));
+      this.showEditBox = false;
+    },
+    // 实例下通过Id获取节点方法
+    getNodeById(currNodeId) {
+      console.log('当前节点', this.$refs.chart.getNodeById(currNodeId));
+      this.showEditBox = false;
+    },
+    // 实例下删除方法
     deleteItem(itemType, id) {
       this.$refs.chart.deleteItem(itemType, id);
+      this.showEditBox = false;
     },
+    // 右击菜单 nodeInfo节点 menuLabel菜单label(当前未更新)
     contextMenuClick(nodeInfo, menuLabel) {
-      console.log(`右键菜单触发: ${menuLabel} --> ${nodeInfo.id}`, nodeInfo);
-      if (menuLabel === "删除") {
-        this.$refs.chart.deleteItem("node", nodeInfo.id);
+      if (menuLabel === '删除') {
+        this.$refs.chart.deleteItem('node', nodeInfo.id);
+      } else if (menuLabel === '编辑') {
+        this.showEditBox = true;
+        this.currentEditingItem = Object.assign({ itemType: 'node' }, nodeInfo);
       }
-    },
-    printPrevNodes(currNodeId) {
-      const nodes = this.$refs.chart.getPreviousNodes(currNodeId);
-      console.log(nodes);
-    },
-    edgeConnected(info) {
-      console.log(info, "edge connected");
-      // eslint-disable-next-line no-unused-vars
-      const { sourceId, id } = info;
-      // eslint-disable-next-line no-unused-vars
-      const chart = this.$refs.chart;
-      // const node = chart.getNodeById(sourceId)
-      // if (node.nodeType === 'SwitchNode') {
-      // setTimeout(() => {
-      // chart.updateItem('edge', id, { condition: 'yes' })
-      // }, 0)
-      // }
-    },
-    logData() {
-      const data = this.$refs.chart.getData();
-      console.log(data, 'data');
     }
   },
   async mounted() {
+    // 组件初始化数据
     this.$refs.chart
       .initChart({
         nodes: [
@@ -196,45 +234,53 @@ export default {
             y: 50,
             nodeType: "FlowNode",
             task: {
-              title: "代码管理"
+              title: "初始节点",
+              status: '执行成功'
             }
           },
           {
             id: "2",
-            x: 300,
-            y: 52,
-            nodeType: "FlowNode",
-            task: {
-              title: "构建任务",
-              status: "执行中"
-            }
+            x: 250,
+            y: 80,
+            nodeType: "Condition",
+            task: {}
           },
           {
             id: "3",
-            x: 598,
-            y: 49,
+            x: 400,
+            y: 52,
             nodeType: "FlowNode",
             task: {
-              title: "部署管理",
-              status: "执行成功"
+              title: "流程A",
+              status: '未开始'
             }
           },
           {
             id: "4",
-            x: 626,
-            y: 252,
+            x: 400,
+            y: 150,
             nodeType: "FlowNode",
             task: {
-              title: "部署管理2",
-              status: "执行失败"
+              title: "流程B",
+              status: '执行中'
             }
           },
           {
-            id: "c79c6f8f-8fce-4f99-92a9-94ff99c84d2a",
-            x: 322,
-            y: 282,
-            nodeType: "FlowNode",
+            id: "5",
+            x: 650,
+            y: 80,
+            nodeType: "Control",
             task: {}
+          },
+          {
+            id: "6",
+            x: 800,
+            y: 80,
+            nodeType: "FlowNode",
+            task: {
+              title: '结束节点',
+              status: '执行失败'
+            }
           }
         ],
         edges: [
@@ -245,7 +291,7 @@ export default {
             task: {}
           },
           {
-            id: "_jsplumb_c_1593419365498",
+            id: "_jsplumb_c_1593419365489",
             sourceId: "2",
             targetId: "3",
             task: {
@@ -253,7 +299,7 @@ export default {
             }
           },
           {
-            id: "_jsplumb_c_1593419365502",
+            id: "_jsplumb_c_1593419365490",
             sourceId: "2",
             targetId: "4",
             task: {
@@ -261,81 +307,24 @@ export default {
             }
           },
           {
-            id: "_jsplumb_c_1593419365506",
-            sourceId: "1",
-            targetId: "c79c6f8f-8fce-4f99-92a9-94ff99c84d2a",
+            id: "_jsplumb_c_1593419365491",
+            sourceId: "3",
+            targetId: "5",
             task: {}
           },
           {
-            id: "_jsplumb_c_1593419365508",
-            sourceId: "c79c6f8f-8fce-4f99-92a9-94ff99c84d2a",
-            targetId: "4",
+            id: "_jsplumb_c_1593419365492",
+            sourceId: "4",
+            targetId: "5",
             task: {}
-          }
+          },
+          {
+            id: "_jsplumb_c_1593419365493",
+            sourceId: "5",
+            targetId: "6",
+            task: {}
+          },
         ]
-      })
-      .then(() => {
-        console.log("chart init done");
-        this.$refs.chart.createNode({
-          nodeType: "FlowNode",
-          x: 10,
-          y: 300,
-          task: {}
-        });
-        setTimeout(() => {
-          // alert('change')
-          // return
-          // eslint-disable-next-line no-unreachable
-          // this.$refs.chart.setData({
-          //   nodes: [
-          //     {
-          //       id: '1',
-          //       x: 64,
-          //       y: 86,
-          //       nodeType: 'FlowNode',
-          //       task: {
-          //         title: '代码管理'
-          //       }
-          //     },
-          //     {
-          //       id: '2',
-          //       x: 332,
-          //       y: 68,
-          //       nodeType: 'FlowNode',
-          //       task: {
-          //         title: '构建任务',
-          //         status: '执行中'
-          //       }
-          //     },
-          //     {
-          //       id: '3',
-          //       x: 598,
-          //       y: 49,
-          //       nodeType: 'FlowNode',
-          //       task: {
-          //         title: '部署管理',
-          //         status: '执行成功'
-          //       }
-          //     }
-          //   ],
-          //   edges: [
-          //     {
-          //       id: '_jsplumb_c_1594877574079',
-          //       sourceId: '1',
-          //       targetId: '2',
-          //       task: {}
-          //     },
-          //     {
-          //       id: '_jsplumb_c_1594877574084',
-          //       sourceId: '2',
-          //       targetId: '3',
-          //       task: {
-          //         condition: 'yes'
-          //       }
-          //     }
-          //   ]
-          // })
-        }, 3000);
       });
   }
 };
@@ -351,11 +340,45 @@ export default {
   margin-top: 60px;
 }
 .type-list {
+  width:300px;
+  padding:15px;
+  box-sizing: border-box;
   padding-right: 5px;
-  border-right: 1px dashed #4c4c4b;
+  border-right: 1px dashed #efefef;
+  font-size: 14px;
+  text-align: left;
+  .con {
+      width: 46%;
+      text-align: center;
+      margin: 5px 2%;
+      border: 1px solid #efefef;
+      border-radius: 5px;
+      display: inline-block;
+      box-sizing:border-box;
+      cursor: move;
+      .iconfont{
+        font-size: #888;
+        font-size: 30px;
+        line-height: 60px;
+      }
+      .name{
+        color: #666;
+        font-size: 13px;
+        line-height: 36px;
+      }
+      &:hover {
+        background-color: #efefef;
+      }
+    }
 }
 .op-container {
+  position: relative;
+  width:1100px;
+  border: 1px solid #efefef;
+  border-radius: 5px;
+  margin: 0 auto;
   display: flex;
+  flex-wrap: wrap;
   li {
     &:hover {
       background-color: #ccc;
@@ -363,12 +386,68 @@ export default {
   }
 }
 .edit-item {
-  position: fixed;
+  position: absolute;
   right: 0;
   top: 0;
+  bottom:0;
+  margin: auto;
   width: 22%;
-  height: 100vh;
   background-color: #fff;
-  box-shadow: 0 0 10px 10px #ccc;
+  box-shadow: -5px 0px 18px rgba(0,0,0,0.1);
+  z-index: 99;
+  padding: 15px;
+  box-sizing: border-box;
+  text-align: left;
+  .con{
+    font-size: 12px;
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: left;
+    input{
+      width:80px;
+      border: 1px solid #efefef;
+      border-radius: 3px;
+      height:25px;
+      margin-left: 10px;
+      padding-left: 8px;
+      box-sizing: border-box;
+    }
+    select{
+      margin-left: 10px;
+      width:80px;
+      border: 1px solid #efefef;
+      border-radius: 3px;
+      height:25px;
+    }
+  }
+  .btn{
+      height:25px;
+      text-align: center;
+      line-height: 25px;
+      background: #11B4EB;
+      font-size: 12px;
+      color: #fff;
+      border-radius: 3px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      border: none;
+  }
+}
+.btnBox{
+  width:1100px;
+  margin: 0 auto;
+  text-align: left;
+  margin-top: 20px;
+  .btn{
+    width:100px;
+    height:35px;
+    text-align: center;
+    line-height: 35px;
+    background: #11B4EB;
+    color: #fff;
+    border-radius: 3px;
+    margin-right: 20px;
+    border: none;
+  }
 }
 </style>

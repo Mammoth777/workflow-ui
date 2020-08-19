@@ -3,13 +3,19 @@
     class="default-flow-node"
     :style="{
       color: mainColor,
-      borderTopColor: mainColor
+      borderColor: mainColor
     }"
   >
-    <h4 class="status" v-text="status"></h4>
+    <!-- <h4 class="status" v-text="status"></h4> -->
+     <div
+      class="iconfont"
+      :style="{
+        color: mainColor
+      }"
+    >&#xe627;</div>
     <div class="title">
-      <span v-if="title" v-text="title"></span>
-      <span v-else class="placeholder">请设置流程节点标题</span>
+      <span v-text="title"></span>
+      <span v-text="status" class="des"></span>
     </div>
   </div>
 </template>
@@ -20,7 +26,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: ''
+      default: '请输入标题'
     },
     status: {
       type: String,
@@ -35,9 +41,9 @@ export default {
     mainColor() {
       const map = {
         未开始: '#4c4c4b',
-        执行中: '#11b4eb',
+        执行中: '#6888EA',
         执行成功: '#08c692',
-        执行失败: '#fe0001',
+        执行失败: '#fe0001'
       };
       return map[this.status];
     },
@@ -51,24 +57,37 @@ export default {
   width: 150px;
   height: 80px;
   font-size: 12px;
-  border: 2px solid #d0d6dc;
-  border-top-width: 8px;
+  border: 1px solid #d0d6dc;
+  border-left-width: 8px;
   border-radius: 8px;
   background-color: #fff;
   transition: all 0.3s ease-in;
-  &.node-selected {
-    box-shadow: 0px 0px 20px 0px #fff5d0;
-  }
-  .status {
-    padding: 5px;
-    margin: 0 10px;
-    border-bottom: 4px solid;
+  text-align: left;
+  .iconfont{
+    width: 40px;
+    display: inline-block;
+    font-size: 26px;
+    color: #777;
+    margin-left:15px;
+    text-align: center;
+    line-height: 80px;
+    vertical-align: middle;
   }
   .title {
-    padding: 10px;
+    display: inline-block;
+    vertical-align: middle;
     color: #4c4c4b;
     text-align: left;
-    padding-left: 15px;
+    padding-left: 8px;
+    span{
+      display: block;
+      color: #666;
+      font-size: 14px;
+      &.des{
+        color: #999;
+        font-size: 12px;
+      }
+    }
   }
 }
 </style>
